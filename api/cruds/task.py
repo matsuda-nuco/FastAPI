@@ -63,16 +63,19 @@ async def delete_task(db: AsyncSession, original: task_model.Task) -> None:
     await db.commit()
 
 
-async def deadline_task(db: AsyncSession) -> List[Tuple[int, str, date, bool]]:
-    original = [i for i in task_model.Task.deadline if i == date.today()]
+async def deadline_task(db: AsyncSession) -> task_model.Task:
+    #result: Result = await db.execute(
+        #select(task_model.Task).filter(task_model.Task.deadline == date.today())
+    #)
+
     result: Result = await (
         db.execute(
             select(
-                original.id,
-                original.title,
-                original.deadline,
-                original.Done.id.isnot(None).label("done"),
-            ).outerjoin(original.Done)
+                task_model.Task.id,
+                task_model.Task.title,
+                task_model.Task.deadline,
+                task_model.Done.id.isnot(None).label("done"),
+            ).filter(task_model.Task.deadline == date.today()).outerjoin(task_model.Done)
         )
     )
     return result.all()
